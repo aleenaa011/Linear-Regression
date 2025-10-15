@@ -1,0 +1,80 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, ConfusionMatrixDisplay
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
+# Download the data
+!wget -q --show-progress "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%201%20-%205/Session%202b%20-%20Logistic%20Regression/cancer.csv"
+
+# Inspirit's util file and discussion exercise answer handler
+if not os.path.exists('inspiritai_util.py'):
+!wget -q "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Modules/inspiritai_util.py"
+from inspiritai_util import handle_discussion_response
+
+biopsy_data['diagnosis_cat'] = biopsy_data['diagnosis'].map({1: '1 (malignant)', 0: '0 (benign)'})
+biopsy_data.head()
+
+Sns.catplot(data=biopsy_data, x='radius_mean', y='diagnosis_cat', 
+s=4, kind='swarm', order=['0 (benign)', '1 (malignant)'])
+
+sns.catplot(data=biopsy_data, x='perimeter_mean', y='diagnosis_cat', s=4, kind='swarm', order=['0 (benign)', '1 (malignant)'])
+sns.catplot(data=biopsy_data, x='texture_mean', y='diagnosis_cat', s=4, kind='swarm', order=['0 (benign)', '1 (malignant)'])
+sns.catplot(data=biopsy_data, x='smoothness_mean', y='diagnosis_cat', s=4, kind='swarm', order=['0 (benign)', '1 (malignant)'])
+
+
+target_boundary = 14.6
+swarm = False 
+sns.catplot(data=biopsy_data,
+x='radius_mean',
+y='diagnosis_cat',
+s=4,
+kind=('swarm' if swarm else 'strip'),
+order=['0 (benign)', '1 (malignant)'])
+Plt.axvline(target_boundary, color='r') 
+
+biopsy_data["boundary_prediction"] = biopsy_data["radius_mean"]
+biopsy_data["boundary_prediction"] = biopsy_data["boundary_prediction"]>target_boundary
+Biopsy_data 
+
+y_true = biopsy_data['diagnosis']
+y_pred = biopsy_data['boundary_prediction']
+
+accuracy = accuracy_score(y_true, y_pred)
+print("Accuracy:", accuracy)
+print("----------------------------")
+
+cnf_matrix = confusion_matrix(y_true, y_pred, labels=[0,1])
+disp = ConfusionMatrixDisplay(confusion_matrix=cnf_matrix,
+display_labels=['0 (benign)', '1 (malignant)'])
+disp.plot(cmap='Blues')
+
+print('Number of biopsies in train data:', len(X_train))
+X_train.head()
+
+test_df = pd.DataFrame({'radius_mean': X_test['radius_mean'],
+'diagnosis': y_test,
+'log_reg_prediction': y_pred})
+test_df['diagnosis_cat'] = test_df['diagnosis'].map({1: '1 (malignant)', 0: '0 (benign)'})
+sns.catplot(data=test_df,
+x='radius_mean',
+y='diagnosis_cat',
+s=4,
+kind='swarm',
+order=['0 (benign)', '1 (malignant)'],
+hue='log_reg_prediction')
+
+cnf_matrix = confusion_matrix(y_test, y_pred, labels=[0,1])
+disp = ConfusionMatrixDisplay(confusion_matrix=cnf_matrix,
+display_labels=['0 (benign)', '1 (malignant)'])
+disp.plot(cmap='Blues')
+
+y_prob = log_reg_model.predict_proba(X_test)
+X_test_view = X_test['radius_mean'].values.squeeze()
+plt.xlabel('radius_mean')
+plt.ylabel('Predicted Probability')
+sns.scatterplot(x=X_test_view, y=y_prob[:,1], hue=y_test, palette=['purple','green'], s=8, alpha=0.5)
+plt.axhline(0.5, color='r', linestyle='--', linewidth=0.5)
